@@ -12,32 +12,30 @@ call plug#begin('~/.vim/plugged')
 "cocvim
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-":CocInstall coc-rome autocomplete for javascript, typescript, json and more
 ":CocInstall coc-clangd for C/C++/Objectiv-C
 ":CocInstall coc-css for css, scss and more
 ":CocInstall coc-html for html, handlebars and razor
 
+"emmet-vim
+Plug 'mattn/emmet-vim'
 "vim-react snippets
 Plug 'epilande/vim-es2015-snippets'
 
 "React code snippets
 Plug 'epilande/vim-react-snippets'
 
-"Ultisnips
+"UltiSnips
 Plug 'SirVer/ultisnips'
 
-" Atom One Dark / Light theme.
+"Atom One Dark/Light Theme
 Plug 'rakr/vim-one'
 
 " Integrate fzf with Vim.
 Plug '~/.fzf'
 Plug 'junegunn/fzf.vim'
 
-" Better manage Vim sessions.
-Plug 'tpope/vim-obsession'
-
 " Zoom in and out of a specific split pane (similar to tmux).
-Plug 'dhruvasagar/vim-zoom'
+" Plug 'dhruvasagar/vim-zoom'
 
 " Pass focus events from tmux to Vim (useful for autoread and linting tools).
 Plug 'tmux-plugins/vim-tmux-focus-events'
@@ -69,6 +67,9 @@ Plug 'nelstrom/vim-visual-star-search'
 " Automatically clear search highlights after you move your cursor.
 Plug 'haya14busa/is.vim'
 
+" adding PostCSS Syntax for Vim
+Plug 'stephenway/postcss.vim'
+
 " Handle multi-file find and replace.
 Plug 'mhinz/vim-grepper'
 
@@ -94,7 +95,7 @@ Plug 'mhinz/vim-signify'
 Plug 'tpope/vim-fugitive'
 
 " Dim paragraphs above and below the active paragraph.
-Plug 'junegunn/limelight.vim'
+" Plug 'junegunn/limelight.vim'
 
 " Distraction free writing by removing UI elements and centering everything.
 Plug 'junegunn/goyo.vim'
@@ -271,9 +272,6 @@ nnoremap <C-h> <C-w><C-h>
 nnoremap <C-k> <C-w><C-k>
 nnoremap <C-j> <C-w><C-j>
 
-"enter newline replace O when in normap
-nnoremap kl o
-
 " Cycle through splits.
 nnoremap <S-Tab> <C-w>w
 
@@ -350,19 +348,9 @@ endfunction
 nnoremap <silent> <Leader>c :call QuickFix_toggle()<CR>
 
 " Convert the selected text's title case using the external tcc script.
-"   Requires: https://github.com/nickjj/title-case-converter
 vnoremap <Leader>tc c<C-r>=system('tcc', getreg('"'))[:-2]<CR>
 
 " Navigate the complete menu items like CTRL+n / CTRL+p would.
-inoremap <expr> <C-j> pumvisible() ? "<C-n>" :"<Down>"
-inoremap <expr> <C-k> pumvisible() ? "<C-p>" : "<Up>"
-
-" Select the complete menu item like CTRL+y would.
-inoremap <expr> kl pumvisible() ? "<C-y>" :"<CR>"
-
-" Cancel the complete menu item like CTRL+e would.
-inoremap <expr> kk pumvisible() ? "<C-e>" : "<Left>"
-
 
 " -----------------------------------------------------------------------------
 " Basic autocommands
@@ -459,6 +447,8 @@ let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit',
+  \ 'ctrl-j': 'enter',
+  \ 'ctrl-k': 'Esc',
   \ 'ctrl-y': {lines -> setreg('*', join(lines, "\n"))}}
 
 " Launch fzf with CTRL+P.
@@ -467,8 +457,6 @@ nnoremap <silent> <C-p> :FZF -m<CR>
 " Map a few common things to do with FZF.
 nnoremap <silent> <Leader><Enter> :Buffers<CR>
 nnoremap <silent> <Leader>l :Lines<CR>
-"esc searching in fzf ctr p by using lk
-cnoremap <silent> lk <Esc>
 
 " Allow passing optional flags into the Rg command.
 "   Example: :Rg myterm -g '*.md'
@@ -626,16 +614,6 @@ nmap <silent> t<C-a> :TestSuite<CR>
 nmap <silent> t<C-l> :TestLast<CR>
 nmap <silent> t<C-g> :TestVisit<CR>
 
-"Remap esc keys, esc in insert & visual mode
-inoremap kj <esc>
-vnoremap kj <esc>
-
-"esc in command mode
-cnoremap kj <C-C>
-"enter in command mode
-cnoremap kl <CR>
-
-set timeoutlen=200
 
 
 "Cocnvim settings:
@@ -649,7 +627,7 @@ set nowritebackup
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " delays and poor user experience.
-set updatetime=300
+set updatetime=750
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
@@ -660,20 +638,9 @@ set signcolumn=yes
 " no select by `"suggest.noselect": true` in your configuration file.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
-inoremap <silent><expr> <C-j>
-      \ coc#pum#visible() ? coc#pum#next(1) :
-      \ CheckBackspace() ? "\<C-j>" :
-      \ coc#refresh()
-inoremap <expr><C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<C-k>"
 
 " Make <CR> to accept selected completion item or notify coc.nvim to format
 " <C-g>u breaks current undo, please make your own choice.
-
-
-function! CheckBackspace() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
 
 " Use <c-space> to trigger completion.
 if has('nvim')
@@ -734,7 +701,7 @@ nmap <leader>as  <Plug>(coc-codeaction-source)
 " Apply the most preferred quickfix action to fix diagnostic on the current line.
 nmap <leader>qf  <Plug>(coc-fix-current)
 
-" Remap keys for apply refactor code actions.
+" jemap keys for apply refactor code actions.
 nmap <silent> <leader>re <Plug>(coc-codeaction-refactor)
 xmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
 nmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
@@ -786,16 +753,16 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 " Show all diagnostics.
 nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 " Manage extensions.
-nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Show commands.
-nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
 " Find symbol of current document.
-nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 " Search workspace symbols.
-nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
 " Do default action for next item.
-nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 " Do default action for previous item.
-nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
-inoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+" inoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
