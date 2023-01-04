@@ -1,2 +1,2 @@
-//This is the guide to setup default work environment
+//This is the setup for boosting productivity of a developer
 
